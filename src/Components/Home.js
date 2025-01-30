@@ -7,7 +7,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import { updateData } from './firebase/UpdateWrite';
 import JobDetail from './Detail';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Sankey,Tooltip, ResponsiveContainer } from 'recharts';
+import SankeyChart from './Sankey/SankeyChart';
 
 export default function HomeSection() {
   const [addJob, setAddJob] = useState(false);
@@ -49,7 +49,7 @@ const statusColors = {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const result = await fetchData("users/" + currentUser.uid);
+        const result = await fetchData("users/" + currentUser.uid + "/Jobs");
         if (result) {
           setJobs(Object.values(result));
         }
@@ -95,85 +95,6 @@ const statusColors = {
     setSelectedJob(job);
   };
 
-  
-  const generateSankeyData = (jobsObject) => {
-    const statusOrder = [
-      "Applied",
-      "HR Interview",
-      "Hiring Manager Interview",
-      "Peer Interviews",
-      "Offer",
-      "Rejected",
-    ];
-  
-    // Extract the jobs array from the object
-    const jobs = jobsObject.data;
-  
-    // Validate that jobs is an array
-    if (!Array.isArray(jobs)) {
-      console.error("Invalid input: 'jobs' must be an array.");
-      return { nodes: [], links: [] };
-    }
-  
-    // Create nodes from statusOrder
-    const nodes = statusOrder.map((status) => ({ name: status }));
-  
-    // Initialize links
-    const links = [];
-  
-    // Iterate over the jobs to create links
-    jobs.forEach((job) => {
-      const maxStatusIndex = statusOrder.indexOf(job.maxStatus);
-      const currentStatusIndex = statusOrder.indexOf(job.status);
-  
-      // Ensure valid status indices
-      if (maxStatusIndex < 0 || currentStatusIndex < 0) return;
-  
-      // Create transitions from "Applied" to maxStatus
-      for (let i = 0; i < maxStatusIndex; i++) {
-        const sourceStatus = statusOrder[i];
-        const targetStatus = statusOrder[i + 1];
-  
-        let link = links.find(
-          (l) =>
-            l.source === i &&
-            l.target === i + 1
-        );
-  
-        if (!link) {
-          link = { source: i, target: i + 1, value: 0 };
-          links.push(link);
-        }
-  
-        link.value += 1;
-      }
-  
-      // If the job was rejected, add a link from maxStatus to "Rejected"
-      if (job.status === "Rejected") {
-        const rejectedIndex = statusOrder.indexOf("Rejected");
-  
-        let link = links.find(
-          (l) =>
-            l.source === maxStatusIndex &&
-            l.target === rejectedIndex
-        );
-  
-        if (!link) {
-          link = { source: maxStatusIndex, target: rejectedIndex, value: 0 };
-          links.push(link);
-        }
-  
-        link.value += 1;
-      }
-    });
-    //console.log(links)
-    return { nodes, links };
-  };
-  
-  
-  
-  
-
   const statusRank = {
     "Applied": 1,
     "HR Interview": 2,
@@ -202,7 +123,7 @@ const statusColors = {
         }
   
         // Update data in Firebase
-        await updateData(`users/${currentUser.uid}/${selectedJob.id}`, updatedFields);
+        await updateData(`users/${currentUser.uid}/Jobs/${selectedJob.id}`, updatedFields);
   
         // Update local state
         setJobs((prevJobs) =>
@@ -300,11 +221,14 @@ const statusColors = {
                         "&:hover": {
                           backgroundColor: "#b9732f",
                         },
-                        padding: "4px",
-                        fontSize: "0.75rem"
+                        fontSize: "0.5rem"
                       }}
                     >
-                      <TableCell>
+                      <TableCell
+                      sx={{
+                        padding: "0px 8px", // Reduce padding
+                      }}
+                      >
                         <Button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -313,7 +237,7 @@ const statusColors = {
                           variant="text"
                           sx={{
                             justifyContent: "flex-start",
-                            // padding: "6px 8px",
+                            padding: "0px 0px",
                             textAlign: "left",
                             minWidth: 0,
                             color: statusColors[job.status],
@@ -360,66 +284,7 @@ const statusColors = {
   <Typography variant="h6" gutterBottom>
     Job Application Summary
   </Typography>
-  <ResponsiveContainer width="100%" height={500}>
-  <Sankey
-    data={generateSankeyData({ data: jobs })}
-    node={(node, index) => (
-      <g key={`node-${index}`}>
-        {/* Render the node rectangle */}
-        <rect
-          x={node.x}
-          y={node.y}
-          width={node.width}
-          height={node.height}
-          fill="#4caf50"
-          stroke="#333"
-        />
-        {/* Render the label for the node */}
-        <text
-          fontSize="14"
-          x={node.x + node.width + 5} // Position the label outside the node
-          y={node.y + node.height / 2}
-          dy="0.35em"
-          textAnchor="start"
-          fill="#000"
-        >
-          {node.name}
-        </text>
-      </g>
-    )}
-    link={{
-      curve: "basis", // Smoothens the link paths
-      stroke: "#8884d8", // Link color
-      strokeWidth: (link) => Math.max(link.value, 2), // Adjust link thickness based on value
-      strokeOpacity: 0.7, // Make links slightly transparent
-      fill: "none", // Remove fill for cleaner links
-    }}
-  >
-    <Tooltip
-      content={({ active, payload }) => {
-        if (active && payload && payload.length) {
-          const { source, target, value } = payload[0];
-          return (
-            <div
-              style={{
-                backgroundColor: 'white',
-                border: '1px solid #ccc',
-                padding: '5px',
-                borderRadius: '5px',
-              }}
-            >
-              <p>
-                <strong>{source.name}</strong> → <strong>{target.name}</strong>
-              </p>
-              <p>Count: {value}</p>
-            </div>
-          );
-        }
-        return null;
-      }}
-    />
-  </Sankey>
-</ResponsiveContainer>
+    <SankeyChart jobs={jobs} statusColors={statusColors} />
 
 
 </Box>

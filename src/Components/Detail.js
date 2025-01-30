@@ -50,10 +50,10 @@ const JobDetail = ({ open, onClose, currentUser, job }) => {
     
     };  
     // Update data in Firebase
-    await updateData(`users/${currentUser.uid}/${jobID}`, updatedFields);
+    await updateData(`users/${currentUser.uid}/Jobs/${jobID}`, updatedFields);
 
 
-      console.log('Saved:', { url, company, role, salary, note, jobDescription });
+      //console.log('Saved:', { url, company, role, salary, note, jobDescription });
       onClose(); // Close the modal after saving
     } catch (error) {
       console.error('Error udpating data:', error);

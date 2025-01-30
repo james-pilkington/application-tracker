@@ -55,11 +55,10 @@ export const saveData = async (uid, url, company, role, salary, note, jobDescrip
     const db = getDatabase(app); // Initialize database
 
     // Create a new reference in the specified dbRefPath
-    const newDocRef = push(ref(db, `users/${uid}`));
+    const newDocRef = push(ref(db, `users/${uid}/Jobs`));
 
     const today = new Date();
     const dateOnly = today.toISOString().split('T')[0]; // Format: YYYY-MM-DD
-
     // Save data to Firebase
     await set(newDocRef, {
       url: url,
@@ -81,4 +80,23 @@ export const saveData = async (uid, url, company, role, salary, note, jobDescrip
   }
 };
 
+export const saveCoverLetter = async (uid, CoverLetter, tag) => {
+  try {
+    const db = getDatabase(app); // Initialize database
+
+    // Create a new reference in the specified dbRefPath
+    const newDocRef = push(ref(db, `users/${uid}/CoverLetters`));
+
+    // Save data to Firebase
+    await set(newDocRef, {
+      CoverLetter: CoverLetter,
+      tag:tag
+
+    });
+
+    //alert("Data saved successfully!");
+  } catch (error) {
+    alert(`Error: ${error.message}`);
+  }
+};
 
