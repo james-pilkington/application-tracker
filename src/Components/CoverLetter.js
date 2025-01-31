@@ -40,7 +40,6 @@ export default function CoverLettersSection() {
 
     try {
       await saveCoverLetter(currentUser.uid, coverLetterText, tag);
-      alert('Cover letter saved successfully!');
 
       // Refresh cover letter list
       setCoverLetters([...coverLetters, { id: Date.now().toString(), text: coverLetterText, tag }]);

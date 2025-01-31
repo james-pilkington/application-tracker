@@ -218,7 +218,7 @@ const handleCompareResume = async () => {
           content: `Write a compelling cover letter that grabs the attention of the hiring manager and highlights the my relevant skills and experience: Make a memorable first impression with a cover letter that stands out from the crowd. Exclude any formalities at the beginning, start wiht the openting paragraph and don't add an system response at the end, only the cover letter should be returned\n\nResume:\n${selectedResumeText}\n\nJob Description:\n${jobDescription}`
       });
   
-      console.log("Comparison Result:", result.data.response); // Log the response
+      //console.log("Comparison Result:", result.data.response); // Log the response
       setCoverLetter(result.data.response)
   } catch (error) {
       console.error("Error generating cover letter:", error);
