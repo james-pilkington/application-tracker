@@ -50,7 +50,7 @@
 import { getDatabase, ref, push, set } from "firebase/database";
 import { app } from "./firebase";
 
-export const saveData = async (uid, url, company, role, salary, note, jobDescription) => {
+export const saveData = async (uid, url, company, role, salary, note, jobDescription, resumeComparison, coverLetterId) => {
   try {
     const db = getDatabase(app); // Initialize database
 
@@ -70,7 +70,10 @@ export const saveData = async (uid, url, company, role, salary, note, jobDescrip
       maxStatus: 'Applied',
       dateApplied: dateOnly,
       lastUpdate: dateOnly,
-      jobDescription: jobDescription
+      jobDescription: jobDescription,
+      resumeComparison:resumeComparison,
+      coverLetterId:coverLetterId
+
 
     });
 
@@ -93,7 +96,7 @@ export const saveCoverLetter = async (uid, CoverLetter, tag) => {
       tag:tag
 
     });
-
+    return newDocRef.key;
     //alert("Data saved successfully!");
   } catch (error) {
     alert(`Error: ${error.message}`);
