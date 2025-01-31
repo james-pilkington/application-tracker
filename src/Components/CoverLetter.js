@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, TextField, Typography, List, ListItem, ListItemButton, ListItemText, Paper } from '@mui/material';
+import { Box, Button, TextField, Typography, List, ListItem, ListItemButton, ListItemText, Paper, IconButton } from '@mui/material';
 import { saveAs } from 'file-saver';
 import { jsPDF } from 'jspdf';
 import { saveCoverLetter } from './firebase/Write';
 import { fetchData } from './firebase/Read';
 import { useAuth } from '../contexts/authContext';
+import { deleteCoverLetter } from './firebase/UpdateWrite';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 export default function CoverLettersSection() {
   const [coverLetterText, setCoverLetterText] = useState('');
@@ -68,6 +70,19 @@ export default function CoverLettersSection() {
     setTag(letter.tag || '');
   };
 
+  const handleDelete = async (recordID) => {
+    try {
+      await deleteCoverLetter(currentUser.uid, recordID);
+      alert('Cover letter deleted successfully!');
+
+      // Remove the deleted cover letter from the state
+      setCoverLetters(coverLetters.filter((letter) => letter.id !== recordID));
+    } catch (error) {
+      console.error('Error deleting cover letter:', error);
+      alert('Failed to delete cover letter.');
+    }
+  };
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       <Typography variant="h5">Create Your Cover Letter</Typography>
@@ -111,6 +126,9 @@ export default function CoverLettersSection() {
               <ListItem key={letter.id} disablePadding>
                 <ListItemButton onClick={() => handleSelectCoverLetter(letter)}>
                   <ListItemText primary={letter.tag} />
+                  <IconButton edge="end" color="error" onClick={() => handleDelete(letter.id)}>
+                    <DeleteIcon />
+                  </IconButton>
                 </ListItemButton>
               </ListItem>
             ))
