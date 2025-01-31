@@ -1,7 +1,19 @@
 [
-    {
-      "origin": ["http://localhost:3000","https://james-pilkington.github.io/application-tracker/"],
-      "method": ["GET"],
-      "maxAgeSeconds": 3600
-    }
-  ]
+  {
+    "origin": [
+      "http://localhost:3000",
+      "https://james-pilkington.github.io"
+    ],
+    "method": [
+      "GET",
+      "POST",
+      "PUT",
+      "DELETE"
+    ],
+    "allowedHeaders": [
+      "Content-Type",
+      "Authorization"
+    ],
+    "maxAgeSeconds": 3600
+  }
+]
