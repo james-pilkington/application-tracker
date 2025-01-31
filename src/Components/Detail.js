@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, Box } from '@mui/material';
+import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, Box,InputAdornment, IconButton } from '@mui/material';
+import DownloadIcon from "@mui/icons-material/Download";
 import { updateData } from './firebase/UpdateWrite';
+import { fetchData } from './firebase/Read';
+import { jsPDF } from "jspdf";
 
 const JobDetail = ({ open, onClose, currentUser, job }) => {
   const [url, setUrl] = useState('');
@@ -10,10 +13,28 @@ const JobDetail = ({ open, onClose, currentUser, job }) => {
   const [note, setNote] = useState('');
   const [jobDescription, setJobDescription] = useState('');
   const [jobID, setJobID] = useState('');
-
+  const [resumeComparison, setResumeComparison] = useState('');
+  const [coverLetter, setCoverLetter] = useState('');
   
 
   useEffect(() => {
+
+    const fetchCoverLetter = async () => {
+      if (job?.coverLetterId) {
+        try {
+          const result = await fetchData(
+            `users/${currentUser.uid}/CoverLetters/${job.coverLetterId}`
+          );
+          setCoverLetter(result?.CoverLetter || ""); // Ensure field exists
+        } catch (error) {
+          console.error("Error fetching cover letter:", error);
+          setCoverLetter(""); // Handle errors gracefully
+        }
+      } else {
+        setCoverLetter(""); // Default value if no ID
+      }
+    };
+
     if (job) {
       setUrl(job.url || '');
       setCompany(job.company || '');
@@ -22,10 +43,20 @@ const JobDetail = ({ open, onClose, currentUser, job }) => {
       setNote(job.note || '');
       setJobDescription(job.jobDescription || '');
       setJobID(job.id || '');
+      setResumeComparison(job.resumeComparison || '');
+      setCoverLetter(job.coverLetterId || '');
+
+      fetchCoverLetter();
+
     }
-  }, [job]);
+  }, [job, currentUser, fetchData]);
 
-
+const handleDownload = () => {
+    const doc = new jsPDF();
+    doc.setFont("helvetica", "normal");
+    doc.text(coverLetter, 10, 10, { maxWidth: 180 }); // Ensures text wraps properly
+    doc.save(`${currentUser.displayName}-${company}-${role}-CoverLetter.pdf`);
+  };
 
   const handleSave = async () => {
     try {
@@ -124,10 +155,44 @@ const JobDetail = ({ open, onClose, currentUser, job }) => {
           fullWidth
           multiline
           minRows={3}
+          maxRows={10}
           value={jobDescription}
           onChange={(e) => setJobDescription(e.target.value)}
           sx={{ mb: 2 }}
         />
+        <TextField
+          label="AI Review"
+          variant="outlined"
+          fullWidth
+          multiline
+          minRows={3}
+          maxRows={10}
+          value={resumeComparison}
+          onChange={(e) => setJobDescription(e.target.value)}
+          sx={{ mb: 2 }}
+          disabled
+        />
+        <TextField
+            label="Cover Letter"
+            value={coverLetter}
+            InputProps={{
+              readOnly: true,
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={handleDownload} color="primary">
+                    <DownloadIcon />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+            variant="outlined"
+            fullWidth
+            disabled
+            multiline
+            minRows={3}
+            maxRows={10}
+            sx={{ mb: 2 }}
+          />
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="secondary">

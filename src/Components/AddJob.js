@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, Box, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
+import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, Box, List, ListItem, ListItemButton, ListItemText, InputAdornment, IconButton } from '@mui/material';
+import DownloadIcon from "@mui/icons-material/Download";
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
 import { saveData, saveCoverLetter } from './firebase/Write';
+import { jsPDF } from "jspdf";
 //import { getStorage } from "firebase/storage";
 import { getAuth } from 'firebase/auth';
 import { app } from './firebase/firebase'; // Adjust path
@@ -100,6 +102,13 @@ const AddJob = ({ open, onClose, currentUser }) => {
     }
   };
 
+  const handleDownload = () => {
+    const doc = new jsPDF();
+    doc.setFont("helvetica", "normal");
+    doc.text(coverLetter, 10, 10, { maxWidth: 180 }); // Ensures text wraps properly
+    doc.save(`${currentUser.displayName}-${company}-${role}-CoverLetter.pdf`);
+  };
+
   // const extractTextFromPDF = async (pdfUrl) => {
   //   try {
   //     console.log("starting", pdfUrl )
@@ -184,7 +193,7 @@ const handleCompareResume = async () => {
     const compareResume = httpsCallable(functions, 'handle_request'); // Call the function
     const result = await compareResume({ 
         role: "user", 
-        content: `Compare my resume to the given job description. Provide a concise analysis highlighting strengths and gaps. Assign a compatibility score from 0 to 100, based on how well my resume aligns with the job requirements. Keep the response in this format [Strenghts:.. Gaps:.. Score:].\n\nResume:\n${selectedResumeText}\n\nJob Description:\n${jobDescription}`
+        content: `Compare my resume to the given job description. Provide a concise analysis highlighting strengths and gaps. Assign a compatibility score from 0 to 100, based on how well my resume aligns with the job requirements. Keep the response in this format Score:, Strenghts:.., Gaps:.. .\n\nResume:\n${selectedResumeText}\n\nJob Description:\n${jobDescription}`
     });
 
     //console.log("Comparison Result:", result.data.response); // Log the response
@@ -259,7 +268,7 @@ const handleCompareResume = async () => {
           variant="outlined"
           fullWidth
           multiline
-          minRows={3}
+          minRows={2}
           value={note}
           onChange={(e) => setNote(e.target.value)}
           sx={{ mb: 2 }}
@@ -309,7 +318,16 @@ const handleCompareResume = async () => {
           <TextField
             label="Cover Letter"
             value={coverLetter}
-            InputProps={{ readOnly: true }}
+            InputProps={{
+              readOnly: true,
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={handleDownload} color="primary">
+                    <DownloadIcon />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
             variant="outlined"
             fullWidth
             disabled

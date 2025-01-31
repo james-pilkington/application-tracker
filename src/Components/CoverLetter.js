@@ -64,8 +64,8 @@ export default function CoverLettersSection() {
   };
 
   const handleSelectCoverLetter = (letter) => {
-    setCoverLetterText(letter.text);
-    setTag(letter.tag);
+    setCoverLetterText(letter.CoverLetter || '');
+    setTag(letter.tag || '');
   };
 
   return (

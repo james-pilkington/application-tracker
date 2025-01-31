@@ -1,10 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { Button, Typography, CircularProgress, TextField, List, ListItem, ListItemIcon, ListItemText } from "@mui/material";
+import { Button, Typography, CircularProgress, TextField, List, ListItem, ListItemIcon, ListItemText, Box } from "@mui/material";
 import { Description } from "@mui/icons-material";
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { getFirestore, collection, addDoc, query, where, getDocs } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import { app } from "./firebase/firebase"; // Adjust import path
+import { app, functions } from "./firebase/firebase"; // Adjust import path
+import { httpsCallable } from 'firebase/functions';
+import ReactMarkdown from 'react-markdown';
+
+import * as PDFJS from 'pdfjs-dist';
+//import 'pdfjs-dist/build/pdf.worker.entry';
+import pdfWorker from 'pdfjs-dist/build/pdf.worker.mjs';
+
+import { getDocument } from 'pdfjs-dist';
 
 const storage = getStorage(app);
 const db = getFirestore(app);
@@ -14,11 +22,16 @@ const ResumesSection = () => {
   const [file, setFile] = useState(null);
   const [fileURL, setFileURL] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState("");
   const [tag, setTag] = useState("");
   const [files, setFiles] = useState([]);
   const [selectedFileURL, setSelectedFileURL] = useState("");
+  const [selectedResumeText, setSelectedResumeText] = useState('');
+  const [resumeComparison, setResumeComparison] = useState('');
+
+    PDFJS.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.45/pdf.worker.mjs';
 
   useEffect(() => {
     fetchUserFiles();
@@ -82,6 +95,89 @@ const ResumesSection = () => {
     setFiles(filesList);
   };
 
+
+
+  const extractTextFromPDF = async (pdfUrl) => {
+      try {
+        const pdf = await getDocument(pdfUrl).promise;
+        let extractedText = [];
+    
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const textContent = await page.getTextContent();
+    
+          // Collect text items instead of mutating a variable inside a loop
+          const pageText = textContent.items.map(item => item.str).join(' ');
+          extractedText.push(pageText);
+        }
+    
+        return extractedText.join(' '); // Return text as a single string
+      } catch (error) {
+        console.error('Error extracting text:', error);
+        return "Error extracting text from PDF.";
+      }
+    };
+    
+  
+    const extractTextFromResume = async (resume) => {
+      try {
+        const response = await fetch(resume.fileURL);
+        //const arrayBuffer = await response.arrayBuffer();
+        if (resume.fileName.endsWith('.pdf')) {
+          return extractTextFromPDF(resume.fileURL);
+        } else {
+          return response.text();
+        }
+      } catch (error) {
+        console.error("Error fetching resume content:", error);
+        return "Could not fetch resume content.";
+      }
+    };
+  
+    const handleAnalyze = async (resume) => {
+      const resumeText = await extractTextFromResume(resume);
+      setSelectedResumeText(resumeText);
+      setResumeComparison("Loading Analysis")
+      setLoading(true);
+
+      try {
+        const compareResume = httpsCallable(functions, 'handle_request'); // Call the function
+        const result = await compareResume({ 
+            role: "user", 
+            content: `Analyze my resume and provide a structured response with proper formatting. 
+    
+    ### **Score:**  
+    [Score here]  
+    
+    ### **Strengths:**  
+    1. [Strength 1]  
+    2. [Strength 2]  
+    3. [Strength 3]  
+    
+    ### **Gaps:**  
+    1. [Gap 1]  
+    2. [Gap 2]  
+    3. [Gap 3]  
+    
+    ### **Improvements:**  
+    1. [Improvement 1]  
+    2. [Improvement 2]  
+    3. [Improvement 3]  
+    
+    Ensure the response is well-structured with spaces and line breaks for readability.
+    
+    **Resume:**  
+    ${resumeText}`
+        }); 
+    
+        //console.log("Comparison Result:", result.data.response); // Log the response
+        setResumeComparison(result.data.response)
+        setLoading(false);
+    } catch (error) {
+        console.error("Error generating comparison:", error);
+    }
+    };
+
   return (
     <div style={{ textAlign: "center", marginTop: "20px" }}>
       <input type="file" accept=".pdf,.txt" onChange={handleFileChange} />
@@ -118,7 +214,10 @@ const ResumesSection = () => {
             <ListItemIcon>
               <Description />
             </ListItemIcon>
-            <ListItemText primary={fileItem.fileName} secondary={fileItem.tag || "No tag"} />
+            <ListItemText primary={fileItem.fileName} secondary={fileItem.tag || "No tag"}/>
+            <Button variant="outlined" size="small"  onClick={() => handleAnalyze(fileItem)}>
+              Analyze
+            </Button>
             <Button variant="outlined" size="small" href={fileItem.fileURL} target="_blank" download>
               Download
             </Button>
@@ -130,9 +229,28 @@ const ResumesSection = () => {
       {selectedFileURL && (
         <div style={{ marginTop: "20px" }}>
           <Typography variant="subtitle1">Selected File:</Typography>
-          <iframe src={selectedFileURL} title="Selected Resume Preview" width="100%" height="500px" />
+          <iframe src={selectedFileURL} title="Selected Resume Preview" width="100%" height="400px" />
         </div>
       )}
+        {loading && <CircularProgress />}
+        {resumeComparison && (
+          <Box display="flex" flexDirection="column" gap={2} sx={{ mt: 2 }}>
+          {/* <TextField
+            label="Resume Comparison"
+            value={resumeComparison}
+            InputProps={{ readOnly: true }}
+            variant="outlined"
+            fullWidth
+            disabled
+            multiline
+            minRows={3}
+            sx={{ mb: 2 }}
+          /> */}
+          <div style={{ width: '100%', wordWrap: 'break-word' }}>
+            <ReactMarkdown>{resumeComparison}</ReactMarkdown>
+          </div>
+        </Box>
+        )}
     </div>
   );
 };

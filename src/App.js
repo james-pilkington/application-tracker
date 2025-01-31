@@ -161,7 +161,7 @@ import ResumesSection from "./Components/Resumes";
 import CoverLettersSection from "./Components/CoverLetter";
 import Login from "./Components/Login";
 import Header from './Components/Header';
-import JobSearchArticle from './Components/satic'
+import JobSearchArticle from './Components/static'
 
 const darkTheme = createTheme({
   palette: {
