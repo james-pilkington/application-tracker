@@ -1,6 +1,6 @@
 [
     {
-      "origin": ["http://localhost:3000"],
+      "origin": ["http://localhost:3000","https://james-pilkington.github.io/application-tracker/"],
       "method": ["GET"],
       "maxAgeSeconds": 3600
     }
