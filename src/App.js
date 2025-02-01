@@ -153,7 +153,7 @@
 // }
 
 import React from "react";
-import { AppBar, Box, Container, CssBaseline, Tab, Tabs } from "@mui/material";
+import { AppBar, Box, Container, CssBaseline, Tab, Tabs, useTheme, useMediaQuery } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { AuthProvider, useAuth } from "./contexts/authContext";
 import HomeSection from "./Components/Home";
@@ -177,6 +177,10 @@ function AppContent() {
   const handleTabChange = (event, newValue) => {
     setTabIndex(newValue);
   };
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // Adjust for mobile
+
 
   const renderTabContent = () => {
     switch (tabIndex) {
@@ -208,7 +212,12 @@ function AppContent() {
            component="main"
            sx={{ flexGrow: 1, p: 3, marginTop: '64px' }}
          >
-        <Tabs value={tabIndex} onChange={handleTabChange} centered>
+        <Tabs 
+        variant={isMobile ? "scrollable" : "standard"}
+        scrollButtons="auto"
+        value={tabIndex} onChange={handleTabChange} 
+        centered
+        >
           <Tab label="Applications" />
           <Tab label="Resumes" />
           <Tab label="Cover Letters"/>
