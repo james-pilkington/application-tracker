@@ -50,7 +50,7 @@ const SankeyChart = ({ jobs, statusColors }) => {
         link.value += 1;
       }
     });
-
+    
     return { nodes, links };
   };
 
@@ -62,7 +62,7 @@ const SankeyChart = ({ jobs, statusColors }) => {
       margin={{ top: 20, bottom: 20 }}
       data={generateSankeyData(jobs)}
       nodeWidth={10}
-      nodePadding={40}
+      nodePadding={100} 
       linkCurvature={0.61}
       iterations={64}
       link={<Link />}

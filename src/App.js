@@ -167,6 +167,9 @@ const darkTheme = createTheme({
   palette: {
     primary: { main: "#0b061a" },
     secondary: { main: "#151A06" },
+
+    background: {
+      default: "#F8F5F0"} // Set app background
   },
 });
 
@@ -217,6 +220,7 @@ function AppContent() {
         scrollButtons="auto"
         value={tabIndex} onChange={handleTabChange} 
         centered
+        TabIndicatorProps={{ style: { backgroundColor: "#fca404" } }} 
         >
           <Tab label="Applications" />
           <Tab label="Resumes" />

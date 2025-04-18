@@ -7,7 +7,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import { updateData } from './firebase/UpdateWrite';
 import JobDetail from './Detail';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import SankeyChart from './Sankey/SankeyChart';
+//import SankeyChart from './Sankey/SankeyChart';
+import SankeyChart2 from './Sankey/SankeyChart2';
 
 export default function HomeSection() {
   const [addJob, setAddJob] = useState(false);
@@ -25,13 +26,17 @@ const theme = createTheme({
   palette: {
     mode: 'light',
     primary: {
-      main: '#6daffe',
+      main: '#edf6ff', //light blue
       light: '#a5bad2',
     },
     secondary: {
-      main: '#9c27b0',
+      //main: '#9c27b0',
+      main: '#fca404'
     },
     background: {
+      default: '#edf6ff',
+    },
+    backgroundColor: {
       default: '#edf6ff',
     },
   },
@@ -167,7 +172,10 @@ const statusColors = {
               </InputAdornment>
             ),
           }}
-          sx={{ mr: 2 }}
+          sx={{ mr: 2,
+            backgroundColor: "white", // <- This sets the white background
+    borderRadius: 1, // optional, for rounded corners
+           }}
         />
         <Button variant="contained" onClick={() => setAddJob(true)}>
           Add Job
@@ -183,6 +191,9 @@ const statusColors = {
         //key={category}
         //expanded={expanded === category}
         //onChange={handleAccordionChange(category)}
+        sx={{
+          backgroundColor: theme.palette.background.default, // or any custom color
+        }}
       >
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
@@ -219,9 +230,13 @@ const statusColors = {
                       }}
                       sx={{
                         "&:hover": {
-                          backgroundColor: "#b9732f",
+                          backgroundColor: "#fff3e0", // pale orange (you can tweak this to something like #ffe5cc if you want it even lighter)
+                          //border: "2px solid #ff8c00", // bright orange border
                         },
-                        fontSize: "0.5rem"
+                        fontSize: "0.5rem",
+                        border: "2px solid transparent", // ensures no layout shift when hover adds the border
+                        borderRadius: "4px", // optional, makes border look cleaner
+                        //transition: "all 0.2s ease-in-out" // smooth transition
                       }}
                     >
                       <TableCell
@@ -284,8 +299,8 @@ const statusColors = {
   <Typography variant="h6" gutterBottom>
     Job Application Summary
   </Typography>
-    <SankeyChart jobs={jobs} statusColors={statusColors} />
-
+    {/* <SankeyChart jobs={jobs} statusColors={statusColors} /> */}
+    <SankeyChart2 jobs={jobs} statusColors={statusColors} />
 
 </Box>
 

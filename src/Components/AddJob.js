@@ -17,6 +17,8 @@ import { functions } from './firebase/firebase';
 //import 'pdfjs-dist/build/pdf.worker.min.js';
 
 
+
+
 const db = getFirestore(app);
 const auth = getAuth(app);
 
@@ -50,6 +52,7 @@ const AddJob = ({ open, onClose, currentUser }) => {
       const userId = auth.currentUser.uid;
       const q = query(collection(db, "userFiles"), where("userId", "==", userId));
       const querySnapshot = await getDocs(q);
+      console.log(querySnapshot)
       const resumeList = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
@@ -215,8 +218,16 @@ const handleCompareResume = async () => {
       const compareResume = httpsCallable(functions, 'handle_request'); // Call the function
       const result = await compareResume({ 
           role: "user", 
-          content: `Write a compelling cover letter that grabs the attention of the hiring manager and highlights the my relevant skills and experience: Make a memorable first impression with a cover letter that stands out from the crowd. Exclude any formalities at the beginning, start wiht the openting paragraph and don't add an system response at the end, only the cover letter should be returned\n\nResume:\n${selectedResumeText}\n\nJob Description:\n${jobDescription}`
-      });
+          //content: `Write a compelling cover letter that grabs the attention of the hiring manager and highlights the my relevant skills and experience: Exclude any formalities at the beginning, start wiht the openting paragraph and don't add an system response at the end, only the cover letter should be returned\n\nResume:\n${selectedResumeText}\n\nJob Description:\n${jobDescription}`
+          content: `Write a compelling cover letter that immediately grabs the hiring manager's attention and highlights my most relevant skills and experience. Do not include any formalities at the beginning—start directly with a strong opening paragraph. Identify four key bullet points from the job description that align with my resume, focusing on the most critical required skills. The response should only include the cover letter itself, with no additional commentary.
+
+                    Resume:
+                    ${selectedResumeText}
+
+                    Job Description:
+                    ${jobDescription}`
+ 
+        });
   
       //console.log("Comparison Result:", result.data.response); // Log the response
       setCoverLetter(result.data.response)
@@ -224,6 +235,43 @@ const handleCompareResume = async () => {
       console.error("Error generating cover letter:", error);
   }
   };
+
+
+const handleScrapeJobUrl = async () => {
+  if (!url) return alert("Please enter a job URL first.");
+
+  try {
+    const getWebsiteContent = httpsCallable(functions, "get_website_content");
+
+    const result = await getWebsiteContent({ url });
+
+    //console.log(result); // inspect raw output if needed
+    const parsed = JSON.parse(result.data[0]);
+    //console.log(parsed.raw);
+    const {
+      fields: {
+        "Company Name": company = '',
+        "Job Title": role = '',
+        "Salary": salary = '',
+        // "Job Description": desc = '',
+        // "Location": location = '',
+        // "Employment Type": employmentType = '',
+        // "Seniority Level": seniority = '',
+      } = {},
+    } = parsed;
+
+
+    setCompany(company);
+    setRole(role);
+    setSalary(salary || 0);
+    setJobDescription(parsed.raw);
+  } catch (error) {
+    console.error("Error scraping job URL:", error);
+    alert("Failed to extract job data from the URL.");
+  }
+};
+
+  
 
   return (
     <Dialog open={open} onClose={onClose}>
@@ -237,6 +285,9 @@ const handleCompareResume = async () => {
             value={url}
             onChange={(e) => setUrl(e.target.value)}
           />
+          <Button variant="outlined" color="secondary" onClick={handleScrapeJobUrl}>
+            Scrape URL
+          </Button>
         </Box>
         <TextField
           label="Company"
@@ -330,7 +381,7 @@ const handleCompareResume = async () => {
             }}
             variant="outlined"
             fullWidth
-            disabled
+            //disabled
             multiline
             minRows={3}
             maxRows={10}

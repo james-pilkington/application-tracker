@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Box, Typography } from '@mui/material';
 import { Button, Modal, TextField, Divider } from '@mui/material';
 import { doSignInWithEmailAndPassword, doSignInWithGoogle, doCreateUserWithEmailAndPassword } from './firebase/auth';
+import Logo from '../Images/Logo.png'
 
 
 const modalStyle = {
@@ -24,7 +25,7 @@ export default function Login() {
     // const [isSigningIn, setIsSigningIn] = useState(false);
     const [confirmPassword, setConfirmPassword] = useState('');
     // const [isRegistering, setIsRegistering] = useState(false);
-    const [showModal, setShowModal] = useState(true);
+    const [showModal, setShowModal] = useState(false);
 
      const handleAuthModal = () => setShowModal(true);
         const handleRegisterModal = () => {
@@ -104,15 +105,16 @@ export default function Login() {
         boxShadow: 3,
       }}
     >
+
          <img
-        src="https://via.placeholder.com/150"
+        src={Logo}
         alt="Job Tracker Welcome"
-        style={{ maxWidth: "100%", height: "auto", borderRadius: "8px" }}
+        style={{ maxWidth: "100%", height: "auto", margin: "50px" }}
       />
-      <Typography variant="h4" gutterBottom>
+      <Typography variant="h6" gutterBottom>
         Welcome to the Job Application Tracker!
       </Typography>
-      <Typography variant="h5" gutterBottom>
+      <Typography variant="h7" gutterBottom>
         Login to get started
       </Typography>
       <Button

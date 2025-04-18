@@ -6,7 +6,7 @@ import { getFirestore, collection, addDoc, query, where, getDocs } from "firebas
 import { getAuth } from "firebase/auth";
 import { app, functions } from "./firebase/firebase"; // Adjust import path
 import { httpsCallable } from 'firebase/functions';
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown from 'react-markdown'; 
 
 import * as PDFJS from 'pdfjs-dist';
 //import 'pdfjs-dist/build/pdf.worker.entry';
@@ -88,11 +88,15 @@ const ResumesSection = () => {
   };
 
   const fetchUserFiles = async () => {
+    try {
     const userId = auth.currentUser.uid;
     const q = query(collection(db, "userFiles"), where("userId", "==", userId));
     const querySnapshot = await getDocs(q);
     const filesList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     setFiles(filesList);
+  } catch (error) {
+    console.error("Error fetching files:", error);
+  }
   };
 
 

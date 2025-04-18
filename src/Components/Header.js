@@ -3,6 +3,7 @@ import { AppBar, Toolbar, Typography, Button, Modal, Box, TextField, Divider, Ic
 import { Settings } from '@mui/icons-material';
 import { doSignInWithEmailAndPassword, doSignInWithGoogle, doSignOut, doCreateUserWithEmailAndPassword } from './firebase/auth';
 import { useAuth } from '../contexts/authContext';
+import Logo from '../Images/Logo.png'
 
 const modalStyle = {
     position: 'absolute',
@@ -47,11 +48,12 @@ const Header = () => {
         palette: {
             mode: 'light',
             primary: {
-                main: '#6daffe',
+                main: '#edf6ff',
                 light: '#a5bad2',
             },
             background: {
                 default: '#edf6ff',
+                //default: '#C6D4E6'
             },
         },
     });
@@ -93,9 +95,12 @@ const Header = () => {
         <ThemeProvider theme={theme}>
             <AppBar position="static">
                 <Toolbar>
-                    <Typography variant="h6" sx={{ flexGrow: 1 }}>
+                    {/* <Typography variant="h6" sx={{ flexGrow: 1 }}>
                         Job Application Tracker!
-                    </Typography>
+                    </Typography> */}
+                    <Box sx={{ flexGrow: 1 }}>
+                    <img src={Logo} alt="Logo" style={{ height: "50px" }} />
+                    </Box>
                     {userLoggedIn ? (
                         <>
                         <Typography>
