@@ -2,7 +2,8 @@
   {
     "origin": [
       "http://localhost:3000",
-      "https://james-pilkington.github.io"
+      "https://james-pilkington.github.io",
+      "https://raisume.xyz"
     ],
     "method": [
       "GET",
