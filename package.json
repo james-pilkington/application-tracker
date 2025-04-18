@@ -1,7 +1,6 @@
 {
   "name": "application-tracker",
   "version": "0.1.0",
-  // "homepage": "https://james-pilkington.github.io/application-tracker",
   "homepage": "https://raisume.xyz",
   "private": true,
   "dependencies": {
