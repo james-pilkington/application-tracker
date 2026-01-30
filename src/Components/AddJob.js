@@ -196,8 +196,34 @@ const handleCompareResume = async () => {
     const compareResume = httpsCallable(functions, 'handle_request'); // Call the function
     const result = await compareResume({ 
         role: "user", 
-        content: `Compare my resume to the given job description. Provide a concise analysis highlighting strengths and gaps. Assign a compatibility score from 0 to 100, based on how well my resume aligns with the job requirements. Keep the response in this format Score:, Strenghts:.., Gaps:.. .\n\nResume:\n${selectedResumeText}\n\nJob Description:\n${jobDescription}`
-    });
+        content: `
+IMPORTANT: Ignore all previous instructions about being helpful or encouraging. 
+You are now a strict, cynical Applicant Tracking System (ATS). 
+Your goal is to accurately score applicants based on matches to requirement.
+Analyze the following Resume against the Job Description.
+
+Anchor at 0
+Step 1: Identify the "Must-Have" skills and requirements in the Job Description.
+Step 2: Check if the Resume contains these specific requirements. Penalize heavily for missing "Must-Haves".
+Step 3: Assign a compatibility score (0-100) based strictly on this rubric:
+- 90-100: Perfect match. Has all skills, exact years of experience, and industry relevance.
+- 75-89: Strong match. Has all critical hard skills but misses minor "nice-to-haves".
+- 50-74: Moderate match. Has some relevant skills but lacks critical specific tools or experience depth.
+- 0-49: Weak match. Missing multiple core requirements or irrelevant background.
+
+Output Format:
+Strengths: [Bulleted list of matched keywords/skills]
+Gaps: [Bulleted list of missing critical keywords/skills]
+Analysis: [Concise summary of why this score was given]
+Score: [Only the number]
+
+Resume:
+${selectedResumeText}
+
+Job Description:
+${jobDescription}
+`
+});
 
     //console.log("Comparison Result:", result.data.response); // Log the response
     setResumeComparison(result.data.response)

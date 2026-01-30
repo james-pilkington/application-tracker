@@ -1,7 +1,7 @@
 {
   "name": "application-tracker",
   "version": "0.1.0",
-  "homepage": "https://www.raisume.xyz",
+  "homepage": "https://james-pilkington.github.io/application-tracker",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.14.0",
