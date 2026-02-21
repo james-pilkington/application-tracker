@@ -219,7 +219,7 @@ function AppContent() {
         variant={isMobile ? "scrollable" : "standard"}
         scrollButtons="auto"
         value={tabIndex} onChange={handleTabChange} 
-        centered
+        centered={!isMobile}
         TabIndicatorProps={{ style: { backgroundColor: "#fca404" } }} 
         >
           <Tab label="Applications" />
